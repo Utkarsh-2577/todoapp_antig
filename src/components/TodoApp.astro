@@ -1,0 +1,842 @@
+---
+// src/components/TodoApp.astro
+---
+
+<div id="todo-app-root" class="min-h-screen bg-[#fafafa] dark:bg-[#000000] text-[#171717] dark:text-[#ededed] font-sans antialiased flex flex-col transition-colors duration-200">
+  
+  <!-- Top Navigation Bar -->
+  <header class="sticky top-0 z-30 w-full bg-[#fafafa]/90 dark:bg-[#000000]/90 backdrop-blur-md border-b border-[#ebebeb] dark:border-[#222222]">
+    <div class="max-w-[1240px] mx-auto px-4 sm:px-6 h-14 flex items-center justify-between gap-4">
+      
+      <!-- Brand Wordmark & Eyebrow -->
+      <div class="flex items-center gap-3">
+        <a href="/" class="flex items-center gap-2.5 group focus:outline-none focus-visible:ring-2 focus-visible:ring-[#0070f3] rounded-[6px] px-1 py-0.5">
+          <!-- Vercel-style geometric triangle logo -->
+          <svg class="w-4 h-4 fill-current text-[#171717] dark:text-white group-hover:scale-105 transition-transform" viewBox="0 0 116 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M57.5 0L115 100H0L57.5 0Z" />
+          </svg>
+          <span class="font-semibold tracking-tight text-[15px]">GEIST<span class="text-[#8f8f8f] dark:text-[#707070] font-normal mx-1">/</span>TASKS</span>
+        </a>
+        <span class="hidden sm:inline-flex items-center px-2 py-0.5 rounded-[6px] text-[11px] font-mono font-medium uppercase tracking-wider bg-[#f2f2f2] dark:bg-[#1a1a1a] text-[#8f8f8f] dark:text-[#707070] border border-[#ebebeb] dark:border-[#262626]">
+          v2.4 Pro
+        </span>
+      </div>
+
+      <!-- Center Search & Command Trigger -->
+      <div class="flex-1 max-w-md hidden md:flex items-center">
+        <button 
+          id="open-cmd-btn"
+          type="button"
+          class="w-full flex items-center justify-between px-3 py-1.5 text-[13px] bg-white dark:bg-[#0a0a0a] hover:bg-[#f7f7f8] dark:hover:bg-[#141414] border border-[#ebebeb] dark:border-[#222222] hover:border-[#d4d4d4] dark:hover:border-[#383838] rounded-[6px] text-[#8f8f8f] dark:text-[#707070] transition-colors shadow-[0_1px_2px_rgba(0,0,0,0.02)]"
+        >
+          <span class="flex items-center gap-2">
+            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            <span>Search or type a command...</span>
+          </span>
+          <kbd class="hidden lg:inline-flex items-center gap-0.5 px-1.5 py-0.5 text-[10px] font-mono bg-[#fafafa] dark:bg-[#161616] text-[#8f8f8f] dark:text-[#707070] border border-[#ebebeb] dark:border-[#262626] rounded-[4px]">
+            <span>⌘</span>K
+          </kbd>
+        </button>
+      </div>
+
+      <!-- Right Action Controls -->
+      <div class="flex items-center gap-2">
+        <!-- Quick Pomodoro Timer Status -->
+        <button 
+          id="nav-pomo-btn"
+          class="flex items-center gap-2 px-2.5 py-1.5 rounded-[6px] text-[12px] font-mono border border-[#ebebeb] dark:border-[#222222] bg-white dark:bg-[#0a0a0a] hover:border-[#0070f3] dark:hover:border-[#0070f3] text-[#4d4d4d] dark:text-[#a1a1a1] transition-all"
+          title="Toggle Focus / Pomodoro Timer"
+        >
+          <span class="w-2 h-2 rounded-full bg-[#ff4d4d] animate-pulse"></span>
+          <span id="nav-pomo-time">25:00</span>
+        </button>
+
+        <!-- Sound Toggle -->
+        <button 
+          id="sound-toggle-btn" 
+          type="button" 
+          aria-label="Toggle UI Audio feedback"
+          class="w-8 h-8 flex items-center justify-center rounded-[6px] border border-[#ebebeb] dark:border-[#222222] bg-white dark:bg-[#0a0a0a] hover:bg-[#f7f7f8] dark:hover:bg-[#141414] text-[#4d4d4d] dark:text-[#a1a1a1] transition-colors"
+          title="Sound Effects (Enabled)"
+        >
+          <svg id="sound-on-icon" class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon><path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path></svg>
+          <svg id="sound-off-icon" class="w-3.5 h-3.5 hidden text-[#8f8f8f]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polygon points="11 5 6 9 2 9 2 15 11 19 11 5"></polygon><line x1="23" y1="9" x2="17" y2="15"></line><line x1="17" y1="9" x2="23" y2="15"></line></svg>
+        </button>
+
+        <!-- Theme Switcher -->
+        <button 
+          id="theme-toggle-btn" 
+          type="button" 
+          aria-label="Toggle Theme"
+          class="w-8 h-8 flex items-center justify-center rounded-[6px] border border-[#ebebeb] dark:border-[#222222] bg-white dark:bg-[#0a0a0a] hover:bg-[#f7f7f8] dark:hover:bg-[#141414] text-[#4d4d4d] dark:text-[#a1a1a1] transition-colors"
+          title="Toggle Light / Dark theme"
+        >
+          <!-- Sun icon (for dark mode) -->
+          <svg class="w-3.5 h-3.5 hidden dark:block" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+          <!-- Moon icon (for light mode) -->
+          <svg class="w-3.5 h-3.5 block dark:hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+        </button>
+
+        <!-- Keyboard Shortcuts Help -->
+        <button 
+          id="shortcuts-btn" 
+          type="button" 
+          aria-label="Keyboard Shortcuts"
+          class="hidden sm:flex w-8 h-8 items-center justify-center rounded-[6px] border border-[#ebebeb] dark:border-[#222222] bg-white dark:bg-[#0a0a0a] hover:bg-[#f7f7f8] dark:hover:bg-[#141414] text-[#4d4d4d] dark:text-[#a1a1a1] transition-colors"
+          title="Keyboard shortcuts (?)"
+        >
+          <span class="text-xs font-mono font-medium">?</span>
+        </button>
+
+        <!-- Marketing Pill CTA for New Task -->
+        <button 
+          id="hero-new-task-btn"
+          type="button"
+          class="inline-flex items-center gap-1.5 px-4 py-1.5 text-[13px] font-medium bg-[#171717] hover:bg-black dark:bg-[#ededed] dark:hover:bg-white text-white dark:text-[#171717] rounded-full shadow-sm hover:shadow transition-all active:scale-[0.98]"
+        >
+          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+          <span>New Task</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Hero Header Band with Mesh Gradient -->
+  <section class="relative geist-hero-mesh border-b border-[#ebebeb] dark:border-[#222222] py-8 sm:py-10 transition-colors">
+    <div class="max-w-[1240px] mx-auto px-4 sm:px-6">
+      
+      <!-- Eyebrow & Hero Title -->
+      <div class="flex flex-col md:flex-row md:items-end justify-between gap-6">
+        <div>
+          <div class="flex items-center gap-2 mb-2">
+            <span class="text-[11px] font-mono font-semibold uppercase tracking-wider text-[#0070f3]">
+              // Developer Productivity Engine
+            </span>
+            <span class="w-1.5 h-1.5 rounded-full bg-[#00dfd8]"></span>
+            <span id="live-date-str" class="text-[12px] font-mono text-[#8f8f8f] dark:text-[#707070]"></span>
+          </div>
+          <h1 class="text-3xl sm:text-4xl md:text-5xl font-semibold tracking-[-1.8px] sm:tracking-[-2.4px] text-[#171717] dark:text-white">
+            High-velocity task orchestration.
+          </h1>
+          <p class="mt-2 text-[#4d4d4d] dark:text-[#a1a1a1] text-[15px] max-w-xl">
+            Streamlined workflow management with Eisenhower quadrants, Kanban pipelines, and integrated Pomodoro execution.
+          </p>
+        </div>
+
+        <!-- Productivity Telemetry Cards Strip -->
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5 shrink-0">
+          <div class="p-3 rounded-[8px] bg-white/80 dark:bg-[#0a0a0a]/80 backdrop-blur border border-[#ebebeb] dark:border-[#222222] shadow-[0_1px_2px_rgba(0,0,0,0.02)] min-w-[100px]">
+            <span class="block text-[10px] font-mono uppercase tracking-wider text-[#8f8f8f] dark:text-[#707070]">Active</span>
+            <span id="metric-active-count" class="text-xl font-semibold tracking-tight text-[#171717] dark:text-white">0</span>
+          </div>
+          <div class="p-3 rounded-[8px] bg-white/80 dark:bg-[#0a0a0a]/80 backdrop-blur border border-[#ebebeb] dark:border-[#222222] shadow-[0_1px_2px_rgba(0,0,0,0.02)] min-w-[100px]">
+            <span class="block text-[10px] font-mono uppercase tracking-wider text-[#8f8f8f] dark:text-[#707070]">Done Today</span>
+            <span id="metric-done-count" class="text-xl font-semibold tracking-tight text-[#0070f3]">0</span>
+          </div>
+          <div class="p-3 rounded-[8px] bg-white/80 dark:bg-[#0a0a0a]/80 backdrop-blur border border-[#ebebeb] dark:border-[#222222] shadow-[0_1px_2px_rgba(0,0,0,0.02)] min-w-[100px]">
+            <span class="block text-[10px] font-mono uppercase tracking-wider text-[#8f8f8f] dark:text-[#707070]">Velocity</span>
+            <span id="metric-velocity" class="text-xl font-semibold tracking-tight text-[#171717] dark:text-white">0%</span>
+          </div>
+          <div class="p-3 rounded-[8px] bg-white/80 dark:bg-[#0a0a0a]/80 backdrop-blur border border-[#ebebeb] dark:border-[#222222] shadow-[0_1px_2px_rgba(0,0,0,0.02)] min-w-[100px]">
+            <span class="block text-[10px] font-mono uppercase tracking-wider text-[#8f8f8f] dark:text-[#707070]">Streak</span>
+            <span id="metric-streak" class="text-xl font-semibold tracking-tight text-[#ff0080]">3d</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Category Navigation Pills Strip -->
+      <div class="mt-8 flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar text-[13px] font-medium">
+        <button data-view="list" class="view-tab-btn active-tab px-3.5 py-1.5 rounded-full border border-transparent bg-[#171717] text-white dark:bg-white dark:text-[#171717] transition-all whitespace-nowrap">
+          <span>All Tasks</span>
+          <span id="badge-all" class="ml-1.5 px-1.5 py-0.2 text-[10px] font-mono rounded-full bg-white/20 dark:bg-black/20">0</span>
+        </button>
+        <button data-view="today" class="view-tab-btn px-3.5 py-1.5 rounded-full border border-[#ebebeb] dark:border-[#222222] bg-white dark:bg-[#0a0a0a] hover:bg-[#f7f7f8] dark:hover:bg-[#141414] text-[#4d4d4d] dark:text-[#a1a1a1] transition-all whitespace-nowrap">
+          <span>Today</span>
+          <span id="badge-today" class="ml-1.5 px-1.5 py-0.2 text-[10px] font-mono rounded-full bg-[#f2f2f2] dark:bg-[#222222]">0</span>
+        </button>
+        <button data-view="upcoming" class="view-tab-btn px-3.5 py-1.5 rounded-full border border-[#ebebeb] dark:border-[#222222] bg-white dark:bg-[#0a0a0a] hover:bg-[#f7f7f8] dark:hover:bg-[#141414] text-[#4d4d4d] dark:text-[#a1a1a1] transition-all whitespace-nowrap">
+          <span>Upcoming</span>
+        </button>
+        <button data-view="matrix" class="view-tab-btn px-3.5 py-1.5 rounded-full border border-[#ebebeb] dark:border-[#222222] bg-white dark:bg-[#0a0a0a] hover:bg-[#f7f7f8] dark:hover:bg-[#141414] text-[#4d4d4d] dark:text-[#a1a1a1] transition-all whitespace-nowrap">
+          <span>Eisenhower Matrix</span>
+        </button>
+        <button data-view="kanban" class="view-tab-btn px-3.5 py-1.5 rounded-full border border-[#ebebeb] dark:border-[#222222] bg-white dark:bg-[#0a0a0a] hover:bg-[#f7f7f8] dark:hover:bg-[#141414] text-[#4d4d4d] dark:text-[#a1a1a1] transition-all whitespace-nowrap">
+          <span>Kanban Board</span>
+        </button>
+        <button data-view="focus" class="view-tab-btn px-3.5 py-1.5 rounded-full border border-[#ebebeb] dark:border-[#222222] bg-white dark:bg-[#0a0a0a] hover:bg-[#f7f7f8] dark:hover:bg-[#141414] text-[#4d4d4d] dark:text-[#a1a1a1] transition-all whitespace-nowrap">
+          <span>Focus Mode</span>
+        </button>
+        <button data-view="analytics" class="view-tab-btn px-3.5 py-1.5 rounded-full border border-[#ebebeb] dark:border-[#222222] bg-white dark:bg-[#0a0a0a] hover:bg-[#f7f7f8] dark:hover:bg-[#141414] text-[#4d4d4d] dark:text-[#a1a1a1] transition-all whitespace-nowrap">
+          <span>Analytics</span>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Main Content Layout -->
+  <main class="flex-1 max-w-[1240px] w-full mx-auto px-4 sm:px-6 py-6 space-y-6">
+    
+    <!-- Smart Interactive Add Task Card -->
+    <div id="quick-add-container" class="rounded-[12px] bg-white dark:bg-[#0a0a0a] border border-[#ebebeb] dark:border-[#222222] shadow-[0_1px_2px_rgba(0,0,0,0.02)] p-3 sm:p-4 transition-all focus-within:border-[#171717] dark:focus-within:border-[#888888]">
+      <form id="add-task-form" class="space-y-3">
+        <!-- Main title input -->
+        <div class="flex items-center gap-3">
+          <span class="text-[#8f8f8f] dark:text-[#707070] shrink-0 pl-1">
+            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+          </span>
+          <input 
+            type="text" 
+            id="task-input-title" 
+            placeholder="What needs to be done? (Try 'Refactor edge routing !p1 #infra @today')" 
+            autocomplete="off"
+            required
+            class="flex-1 bg-transparent border-none text-[15px] text-[#171717] dark:text-white placeholder-[#8f8f8f] dark:placeholder-[#666666] focus:outline-none"
+          />
+          <button 
+            type="button" 
+            id="toggle-expand-form"
+            class="px-2 py-1 text-xs text-[#8f8f8f] dark:text-[#707070] hover:text-[#171717] dark:hover:text-white rounded-[6px] border border-transparent hover:border-[#ebebeb] dark:hover:border-[#222222]"
+            title="Expand task options"
+          >
+            Options ▾
+          </button>
+          <button 
+            type="submit" 
+            class="px-3 py-1.5 text-[13px] font-medium bg-[#171717] dark:bg-[#ededed] text-white dark:text-[#171717] hover:opacity-90 rounded-[6px] transition-opacity"
+          >
+            Add
+          </button>
+        </div>
+
+        <!-- Expandable Detail Options -->
+        <div id="expanded-options" class="hidden pt-3 border-t border-[#ebebeb] dark:border-[#1f1f1f] space-y-3">
+          <div>
+            <textarea 
+              id="task-input-desc" 
+              placeholder="Description or markdown notes (optional)..." 
+              rows="2"
+              class="w-full bg-[#fafafa] dark:bg-[#121212] border border-[#ebebeb] dark:border-[#222222] rounded-[6px] p-2.5 text-[13px] text-[#171717] dark:text-white placeholder-[#8f8f8f] dark:placeholder-[#666666] focus:outline-none focus:border-[#0070f3]"
+            ></textarea>
+          </div>
+
+          <div class="flex flex-wrap items-center gap-3 text-[13px]">
+            <!-- Priority selector -->
+            <div class="flex items-center gap-1.5">
+              <span class="text-xs font-mono uppercase text-[#8f8f8f]">Priority:</span>
+              <select id="task-input-priority" class="bg-[#fafafa] dark:bg-[#121212] border border-[#ebebeb] dark:border-[#222222] text-[#171717] dark:text-white text-xs rounded-[6px] px-2 py-1 focus:outline-none">
+                <option value="p1">P1 — Urgent & Important</option>
+                <option value="p2">P2 — High Priority</option>
+                <option value="p3" selected>P3 — Medium</option>
+                <option value="p4">P4 — Low Priority</option>
+              </select>
+            </div>
+
+            <!-- Due Date -->
+            <div class="flex items-center gap-1.5">
+              <span class="text-xs font-mono uppercase text-[#8f8f8f]">Due:</span>
+              <input 
+                type="date" 
+                id="task-input-date" 
+                class="bg-[#fafafa] dark:bg-[#121212] border border-[#ebebeb] dark:border-[#222222] text-[#171717] dark:text-white text-xs rounded-[6px] px-2 py-1 focus:outline-none"
+              />
+              <button type="button" class="quick-date-btn text-[11px] px-2 py-0.5 rounded-[4px] bg-[#f2f2f2] dark:bg-[#1c1c1c] text-[#4d4d4d] dark:text-[#a1a1a1] hover:text-[#171717] dark:hover:text-white" data-offset="0">Today</button>
+              <button type="button" class="quick-date-btn text-[11px] px-2 py-0.5 rounded-[4px] bg-[#f2f2f2] dark:bg-[#1c1c1c] text-[#4d4d4d] dark:text-[#a1a1a1] hover:text-[#171717] dark:hover:text-white" data-offset="1">Tomorrow</button>
+            </div>
+
+            <!-- Tags input -->
+            <div class="flex items-center gap-1.5 flex-1 min-w-[200px]">
+              <span class="text-xs font-mono uppercase text-[#8f8f8f]">Tags:</span>
+              <input 
+                type="text" 
+                id="task-input-tags" 
+                placeholder="frontend, api, bug (comma separated)"
+                class="flex-1 bg-[#fafafa] dark:bg-[#121212] border border-[#ebebeb] dark:border-[#222222] text-[#171717] dark:text-white text-xs rounded-[6px] px-2 py-1 focus:outline-none"
+              />
+            </div>
+
+            <!-- Estimated Pomodoros -->
+            <div class="flex items-center gap-1.5">
+              <span class="text-xs font-mono uppercase text-[#8f8f8f]">Est. ⏱️:</span>
+              <input 
+                type="number" 
+                id="task-input-poms" 
+                min="1" 
+                max="12" 
+                value="1" 
+                class="w-14 bg-[#fafafa] dark:bg-[#121212] border border-[#ebebeb] dark:border-[#222222] text-[#171717] dark:text-white text-xs rounded-[6px] px-2 py-1 focus:outline-none"
+              />
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <!-- Filter & Sort Toolbar Bar -->
+    <div class="flex flex-wrap items-center justify-between gap-3 pt-2">
+      <!-- Left Filters -->
+      <div class="flex items-center flex-wrap gap-2">
+        <!-- Priority Filter -->
+        <div class="flex items-center rounded-[6px] border border-[#ebebeb] dark:border-[#222222] bg-white dark:bg-[#0a0a0a] p-0.5 text-xs font-medium">
+          <button data-filter-p="all" class="filter-p-btn active-filter px-2.5 py-1 rounded-[4px] bg-[#171717] text-white dark:bg-white dark:text-[#171717]">All</button>
+          <button data-filter-p="p1" class="filter-p-btn px-2 py-1 rounded-[4px] text-[#ee0000] hover:bg-[#f2f2f2] dark:hover:bg-[#1c1c1c]">P1</button>
+          <button data-filter-p="p2" class="filter-p-btn px-2 py-1 rounded-[4px] text-[#f5a623] hover:bg-[#f2f2f2] dark:hover:bg-[#1c1c1c]">P2</button>
+          <button data-filter-p="p3" class="filter-p-btn px-2 py-1 rounded-[4px] text-[#0070f3] hover:bg-[#f2f2f2] dark:hover:bg-[#1c1c1c]">P3</button>
+          <button data-filter-p="p4" class="filter-p-btn px-2 py-1 rounded-[4px] text-[#8f8f8f] hover:bg-[#f2f2f2] dark:hover:bg-[#1c1c1c]">P4</button>
+        </div>
+
+        <!-- Tag dropdown/chips container -->
+        <div id="dynamic-tags-container" class="flex items-center gap-1.5 flex-wrap">
+          <!-- Dynamically injected active tags -->
+        </div>
+      </div>
+
+      <!-- Right Sort & Action Dropdown -->
+      <div class="flex items-center gap-2">
+        <select id="sort-select" class="bg-white dark:bg-[#0a0a0a] border border-[#ebebeb] dark:border-[#222222] text-[#4d4d4d] dark:text-[#a1a1a1] text-xs rounded-[6px] px-2.5 py-1.5 focus:outline-none">
+          <option value="created-desc">Newest First</option>
+          <option value="due-asc">Due Date (Earliest)</option>
+          <option value="priority-asc">Priority (P1 → P4)</option>
+          <option value="title-asc">Alphabetical (A-Z)</option>
+        </select>
+
+        <!-- Batch actions menu trigger -->
+        <button 
+          id="batch-menu-btn" 
+          class="px-2.5 py-1.5 rounded-[6px] text-xs font-medium border border-[#ebebeb] dark:border-[#222222] bg-white dark:bg-[#0a0a0a] hover:bg-[#f7f7f8] dark:hover:bg-[#141414] text-[#4d4d4d] dark:text-[#a1a1a1]"
+        >
+          Manage Data ▾
+        </button>
+      </div>
+    </div>
+
+    <!-- Batch Management Modal / Popover -->
+    <div id="batch-menu-dropdown" class="hidden relative z-20">
+      <div class="absolute right-0 top-1 w-64 rounded-[8px] bg-white dark:bg-[#0a0a0a] border border-[#ebebeb] dark:border-[#222222] shadow-xl p-2 text-[13px] space-y-1">
+        <button id="action-export-json" class="w-full text-left px-2.5 py-1.5 rounded-[4px] hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] flex items-center justify-between">
+          <span>Export tasks as JSON</span>
+          <span class="text-[10px] font-mono text-[#8f8f8f]">.json</span>
+        </button>
+        <button id="action-export-csv" class="w-full text-left px-2.5 py-1.5 rounded-[4px] hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] flex items-center justify-between">
+          <span>Export tasks as CSV</span>
+          <span class="text-[10px] font-mono text-[#8f8f8f]">.csv</span>
+        </button>
+        <label class="w-full text-left px-2.5 py-1.5 rounded-[4px] hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] flex items-center justify-between cursor-pointer">
+          <span>Import tasks JSON</span>
+          <input type="file" id="action-import-file" accept=".json" class="hidden" />
+          <span class="text-[10px] font-mono text-[#0070f3]">Upload</span>
+        </label>
+        <div class="border-t border-[#ebebeb] dark:border-[#222222] my-1"></div>
+        <button id="action-clear-completed" class="w-full text-left px-2.5 py-1.5 rounded-[4px] hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] text-[#4d4d4d] dark:text-[#a1a1a1]">
+          Clear completed tasks
+        </button>
+        <button id="action-load-sample" class="w-full text-left px-2.5 py-1.5 rounded-[4px] hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] text-[#0070f3]">
+          Load sample tech roadmap
+        </button>
+      </div>
+    </div>
+
+    <!-- ================= VIEW 1: Standard List View ================= -->
+    <div id="view-list-container" class="space-y-6">
+      
+      <!-- Pending Tasks Section -->
+      <div>
+        <div class="flex items-center justify-between pb-2 border-b border-[#ebebeb] dark:border-[#222222] mb-3">
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-mono font-semibold uppercase tracking-wider text-[#171717] dark:text-white">Active Queue</span>
+            <span id="active-queue-count" class="px-1.5 py-0.2 text-[11px] font-mono rounded-full bg-[#f2f2f2] dark:bg-[#1c1c1c] text-[#8f8f8f] dark:text-[#707070]">0</span>
+          </div>
+          <span class="text-xs text-[#8f8f8f] font-mono">Press 'N' for new task</span>
+        </div>
+
+        <!-- Task List Items Container -->
+        <div id="active-tasks-list" class="space-y-2">
+          <!-- Rendered via JS -->
+        </div>
+
+        <!-- Empty state -->
+        <div id="active-empty-state" class="hidden text-center py-12 px-4 rounded-[12px] border border-dashed border-[#ebebeb] dark:border-[#222222]">
+          <div class="w-10 h-10 mx-auto mb-3 rounded-full bg-[#f2f2f2] dark:bg-[#141414] flex items-center justify-center text-[#8f8f8f]">
+            <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 14 14"></polyline></svg>
+          </div>
+          <h3 class="font-medium text-[15px] text-[#171717] dark:text-white">No active tasks in this view</h3>
+          <p class="text-xs text-[#8f8f8f] mt-1 max-w-xs mx-auto">Add a new task above or hit <kbd class="px-1.5 py-0.5 bg-[#f2f2f2] dark:bg-[#222222] rounded text-[10px] font-mono">N</kbd> to quick-create.</p>
+        </div>
+      </div>
+
+      <!-- Completed Tasks Collapsible Section -->
+      <div id="completed-tasks-wrapper" class="pt-4">
+        <button 
+          id="toggle-completed-section"
+          class="flex items-center gap-2 text-xs font-mono font-semibold uppercase tracking-wider text-[#8f8f8f] dark:text-[#707070] hover:text-[#171717] dark:hover:text-white pb-2 mb-3"
+        >
+          <span id="completed-arrow">▾</span>
+          <span>Completed Tasks (<span id="completed-queue-count">0</span>)</span>
+        </button>
+
+        <div id="completed-tasks-list" class="space-y-2">
+          <!-- Rendered via JS -->
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= VIEW 2: Eisenhower Matrix View ================= -->
+    <div id="view-matrix-container" class="hidden space-y-4">
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="text-lg font-semibold tracking-tight text-[#171717] dark:text-white">Eisenhower Decision Matrix</h2>
+          <p class="text-xs text-[#8f8f8f] dark:text-[#707070]">Prioritize by urgency and impact to eliminate bottlenecks.</p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <!-- Q1: Urgent & Important (Do First) -->
+        <div class="rounded-[12px] p-4 bg-white dark:bg-[#0a0a0a] border-2 border-[#ee0000]/30 shadow-[0_1px_2px_rgba(0,0,0,0.02)] space-y-3">
+          <div class="flex items-center justify-between border-b border-[#ebebeb] dark:border-[#222222] pb-2">
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-[#ee0000]"></span>
+              <span class="text-xs font-mono font-semibold uppercase tracking-wider text-[#ee0000]">Q1: Do First (Urgent & Important)</span>
+            </div>
+            <span id="matrix-q1-count" class="text-xs font-mono font-medium text-[#8f8f8f]">0</span>
+          </div>
+          <div id="matrix-q1-list" class="space-y-2 min-h-[140px]"></div>
+        </div>
+
+        <!-- Q2: Not Urgent but Important (Schedule) -->
+        <div class="rounded-[12px] p-4 bg-white dark:bg-[#0a0a0a] border-2 border-[#0070f3]/30 shadow-[0_1px_2px_rgba(0,0,0,0.02)] space-y-3">
+          <div class="flex items-center justify-between border-b border-[#ebebeb] dark:border-[#222222] pb-2">
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-[#0070f3]"></span>
+              <span class="text-xs font-mono font-semibold uppercase tracking-wider text-[#0070f3]">Q2: Schedule (Important, Not Urgent)</span>
+            </div>
+            <span id="matrix-q2-count" class="text-xs font-mono font-medium text-[#8f8f8f]">0</span>
+          </div>
+          <div id="matrix-q2-list" class="space-y-2 min-h-[140px]"></div>
+        </div>
+
+        <!-- Q3: Urgent but Not Important (Delegate) -->
+        <div class="rounded-[12px] p-4 bg-white dark:bg-[#0a0a0a] border-2 border-[#f5a623]/30 shadow-[0_1px_2px_rgba(0,0,0,0.02)] space-y-3">
+          <div class="flex items-center justify-between border-b border-[#ebebeb] dark:border-[#222222] pb-2">
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-[#f5a623]"></span>
+              <span class="text-xs font-mono font-semibold uppercase tracking-wider text-[#f5a623]">Q3: Delegate (Urgent, Low Impact)</span>
+            </div>
+            <span id="matrix-q3-count" class="text-xs font-mono font-medium text-[#8f8f8f]">0</span>
+          </div>
+          <div id="matrix-q3-list" class="space-y-2 min-h-[140px]"></div>
+        </div>
+
+        <!-- Q4: Not Urgent & Not Important (Eliminate) -->
+        <div class="rounded-[12px] p-4 bg-white dark:bg-[#0a0a0a] border-2 border-[#8f8f8f]/30 shadow-[0_1px_2px_rgba(0,0,0,0.02)] space-y-3">
+          <div class="flex items-center justify-between border-b border-[#ebebeb] dark:border-[#222222] pb-2">
+            <div class="flex items-center gap-2">
+              <span class="w-2.5 h-2.5 rounded-full bg-[#8f8f8f]"></span>
+              <span class="text-xs font-mono font-semibold uppercase tracking-wider text-[#8f8f8f]">Q4: Eliminate (Backlog / Low Value)</span>
+            </div>
+            <span id="matrix-q4-count" class="text-xs font-mono font-medium text-[#8f8f8f]">0</span>
+          </div>
+          <div id="matrix-q4-list" class="space-y-2 min-h-[140px]"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= VIEW 3: Kanban Board View ================= -->
+    <div id="view-kanban-container" class="hidden space-y-4">
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="text-lg font-semibold tracking-tight text-[#171717] dark:text-white">Engineering Kanban Pipeline</h2>
+          <p class="text-xs text-[#8f8f8f] dark:text-[#707070]">Move tasks across phases from Backlog to Production.</p>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 items-start">
+        <!-- Col 1: Backlog -->
+        <div class="rounded-[12px] p-3 bg-white dark:bg-[#0a0a0a] border border-[#ebebeb] dark:border-[#222222] space-y-2">
+          <div class="flex items-center justify-between px-1 py-1 border-b border-[#ebebeb] dark:border-[#222222]">
+            <span class="text-xs font-mono font-semibold uppercase text-[#8f8f8f]">Backlog</span>
+            <span id="kanban-count-inbox" class="text-xs font-mono px-1.5 py-0.2 rounded bg-[#f2f2f2] dark:bg-[#1c1c1c]">0</span>
+          </div>
+          <div id="kanban-col-inbox" class="space-y-2 min-h-[220px]"></div>
+        </div>
+
+        <!-- Col 2: Todo / Ready -->
+        <div class="rounded-[12px] p-3 bg-white dark:bg-[#0a0a0a] border border-[#ebebeb] dark:border-[#222222] space-y-2">
+          <div class="flex items-center justify-between px-1 py-1 border-b border-[#ebebeb] dark:border-[#222222]">
+            <span class="text-xs font-mono font-semibold uppercase text-[#0070f3]">Ready / Todo</span>
+            <span id="kanban-count-todo" class="text-xs font-mono px-1.5 py-0.2 rounded bg-[#f2f2f2] dark:bg-[#1c1c1c]">0</span>
+          </div>
+          <div id="kanban-col-todo" class="space-y-2 min-h-[220px]"></div>
+        </div>
+
+        <!-- Col 3: In Progress -->
+        <div class="rounded-[12px] p-3 bg-white dark:bg-[#0a0a0a] border border-[#ebebeb] dark:border-[#222222] space-y-2">
+          <div class="flex items-center justify-between px-1 py-1 border-b border-[#ebebeb] dark:border-[#222222]">
+            <span class="text-xs font-mono font-semibold uppercase text-[#f5a623]">In Progress</span>
+            <span id="kanban-count-in_progress" class="text-xs font-mono px-1.5 py-0.2 rounded bg-[#f2f2f2] dark:bg-[#1c1c1c]">0</span>
+          </div>
+          <div id="kanban-col-in_progress" class="space-y-2 min-h-[220px]"></div>
+        </div>
+
+        <!-- Col 4: Completed -->
+        <div class="rounded-[12px] p-3 bg-white dark:bg-[#0a0a0a] border border-[#ebebeb] dark:border-[#222222] space-y-2">
+          <div class="flex items-center justify-between px-1 py-1 border-b border-[#ebebeb] dark:border-[#222222]">
+            <span class="text-xs font-mono font-semibold uppercase text-[#50e3c2]">Completed</span>
+            <span id="kanban-count-completed" class="text-xs font-mono px-1.5 py-0.2 rounded bg-[#f2f2f2] dark:bg-[#1c1c1c]">0</span>
+          </div>
+          <div id="kanban-col-completed" class="space-y-2 min-h-[220px]"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= VIEW 4: Dedicated Focus / Pomodoro Mode ================= -->
+    <div id="view-focus-container" class="hidden space-y-6">
+      <div class="max-w-xl mx-auto text-center space-y-6 py-6">
+        
+        <div class="space-y-1">
+          <span class="text-xs font-mono uppercase tracking-wider text-[#0070f3] font-semibold">// Distraction-Free Execution</span>
+          <h2 class="text-2xl font-semibold tracking-tight text-[#171717] dark:text-white">Focus Engine</h2>
+          <p id="focus-task-title-display" class="text-sm text-[#4d4d4d] dark:text-[#a1a1a1] italic max-w-md mx-auto">
+            Select a task to anchor this sprint session
+          </p>
+        </div>
+
+        <!-- Timer Circle / Display -->
+        <div class="p-8 rounded-[16px] bg-white dark:bg-[#0a0a0a] border border-[#ebebeb] dark:border-[#222222] shadow-sm space-y-6">
+          <div class="flex items-center justify-center gap-2">
+            <button id="pomo-mode-work" class="px-3 py-1 rounded-full text-xs font-medium bg-[#171717] text-white dark:bg-white dark:text-[#171717]">Work (25m)</button>
+            <button id="pomo-mode-break" class="px-3 py-1 rounded-full text-xs font-medium text-[#8f8f8f] hover:bg-[#f2f2f2] dark:hover:bg-[#1c1c1c]">Break (5m)</button>
+          </div>
+
+          <div class="text-6xl sm:text-7xl font-mono font-semibold tracking-tight text-[#171717] dark:text-white">
+            <span id="pomo-display-time">25:00</span>
+          </div>
+
+          <div class="flex items-center justify-center gap-3">
+            <button 
+              id="pomo-toggle-btn" 
+              class="px-6 py-2.5 rounded-full text-sm font-medium bg-[#171717] hover:bg-black dark:bg-[#ededed] dark:hover:bg-white text-white dark:text-[#171717] transition-all"
+            >
+              Start Sprint
+            </button>
+            <button 
+              id="pomo-reset-btn" 
+              class="px-4 py-2.5 rounded-full text-sm font-medium border border-[#ebebeb] dark:border-[#222222] hover:bg-[#f7f7f8] dark:hover:bg-[#141414] text-[#4d4d4d] dark:text-[#a1a1a1]"
+            >
+              Reset
+            </button>
+          </div>
+
+          <div class="flex items-center justify-center gap-6 pt-4 border-t border-[#ebebeb] dark:border-[#1f1f1f] text-xs font-mono text-[#8f8f8f]">
+            <span>Today: <strong id="pomo-completed-sessions" class="text-[#171717] dark:text-white font-semibold">0</strong> sprints</span>
+            <span>Est. Focus: <strong id="pomo-focused-mins" class="text-[#171717] dark:text-white font-semibold">0</strong> mins</span>
+          </div>
+        </div>
+
+        <!-- Task Selector for Focus Session -->
+        <div class="text-left p-4 rounded-[12px] bg-white dark:bg-[#0a0a0a] border border-[#ebebeb] dark:border-[#222222] space-y-2">
+          <label class="block text-xs font-mono uppercase text-[#8f8f8f]">Bind Focus Session to Task:</label>
+          <select id="focus-task-select" class="w-full bg-[#fafafa] dark:bg-[#121212] border border-[#ebebeb] dark:border-[#222222] rounded-[6px] p-2 text-xs text-[#171717] dark:text-white focus:outline-none">
+            <option value="">-- No specific task (Free focus) --</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- ================= VIEW 5: Productivity & Velocity Analytics ================= -->
+    <div id="view-analytics-container" class="hidden space-y-6">
+      <div class="flex items-center justify-between">
+        <div>
+          <h2 class="text-lg font-semibold tracking-tight text-[#171717] dark:text-white">Productivity & Velocity Analytics</h2>
+          <p class="text-xs text-[#8f8f8f] dark:text-[#707070]">Real-time completion trends, priority distribution, and tag density.</p>
+        </div>
+      </div>
+
+      <!-- Stats Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <!-- Completion Health -->
+        <div class="p-4 rounded-[12px] bg-white dark:bg-[#0a0a0a] border border-[#ebebeb] dark:border-[#222222] space-y-3">
+          <span class="text-xs font-mono font-semibold uppercase text-[#8f8f8f]">Completion Rate</span>
+          <div class="flex items-baseline gap-2">
+            <span id="stat-rate" class="text-3xl font-semibold tracking-tight text-[#171717] dark:text-white">0%</span>
+            <span class="text-xs text-[#8f8f8f]">of all logged tasks</span>
+          </div>
+          <!-- Progress bar -->
+          <div class="w-full bg-[#f2f2f2] dark:bg-[#1f1f1f] h-2 rounded-full overflow-hidden">
+            <div id="stat-rate-bar" class="h-full bg-[#0070f3] rounded-full transition-all duration-500 w-0"></div>
+          </div>
+          <div class="flex justify-between text-xs text-[#8f8f8f] pt-1">
+            <span>Done: <strong id="stat-done-num" class="text-[#171717] dark:text-white">0</strong></span>
+            <span>Pending: <strong id="stat-pending-num" class="text-[#171717] dark:text-white">0</strong></span>
+          </div>
+        </div>
+
+        <!-- Priority Breakdown -->
+        <div class="p-4 rounded-[12px] bg-white dark:bg-[#0a0a0a] border border-[#ebebeb] dark:border-[#222222] space-y-3">
+          <span class="text-xs font-mono font-semibold uppercase text-[#8f8f8f]">Priority Distribution</span>
+          <div class="space-y-1.5 text-xs">
+            <div class="flex items-center justify-between">
+              <span class="text-[#ee0000] font-medium">P1 Urgent & High</span>
+              <span id="stat-p1-count" class="font-mono">0</span>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="text-[#f5a623] font-medium">P2 High</span>
+              <span id="stat-p2-count" class="font-mono">0</span>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="text-[#0070f3] font-medium">P3 Medium</span>
+              <span id="stat-p3-count" class="font-mono">0</span>
+            </div>
+            <div class="flex items-center justify-between">
+              <span class="text-[#8f8f8f] font-medium">P4 Low</span>
+              <span id="stat-p4-count" class="font-mono">0</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Pomodoro Sprint Stats -->
+        <div class="p-4 rounded-[12px] bg-white dark:bg-[#0a0a0a] border border-[#ebebeb] dark:border-[#222222] space-y-3">
+          <span class="text-xs font-mono font-semibold uppercase text-[#8f8f8f]">Deep Work Time</span>
+          <div class="flex items-baseline gap-2">
+            <span id="stat-focus-hours" class="text-3xl font-semibold tracking-tight text-[#7928ca] dark:text-[#a855f7]">0.0h</span>
+            <span class="text-xs text-[#8f8f8f]">logged in focus</span>
+          </div>
+          <p class="text-xs text-[#8f8f8f]">
+            Total Pomodoro sprints recorded: <strong id="stat-sprints-total" class="text-[#171717] dark:text-white">0</strong>
+          </p>
+        </div>
+      </div>
+
+      <!-- Weekly Activity Visualization Strip -->
+      <div class="p-5 rounded-[12px] bg-white dark:bg-[#0a0a0a] border border-[#ebebeb] dark:border-[#222222] space-y-4">
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-mono font-semibold uppercase text-[#8f8f8f]">7-Day Velocity Matrix</span>
+          <span class="text-[11px] font-mono text-[#0070f3]">Active Velocity Engine</span>
+        </div>
+        <div class="grid grid-cols-7 gap-2 text-center pt-2">
+          <div class="space-y-2">
+            <div class="h-24 bg-[#fafafa] dark:bg-[#121212] rounded-[6px] border border-[#ebebeb] dark:border-[#222222] flex flex-col justify-end p-1">
+              <div class="bg-gradient-to-t from-[#0070f3] to-[#00dfd8] rounded-[4px] w-full h-[40%]"></div>
+            </div>
+            <span class="text-[11px] font-mono text-[#8f8f8f]">Mon</span>
+          </div>
+          <div class="space-y-2">
+            <div class="h-24 bg-[#fafafa] dark:bg-[#121212] rounded-[6px] border border-[#ebebeb] dark:border-[#222222] flex flex-col justify-end p-1">
+              <div class="bg-gradient-to-t from-[#0070f3] to-[#00dfd8] rounded-[4px] w-full h-[65%]"></div>
+            </div>
+            <span class="text-[11px] font-mono text-[#8f8f8f]">Tue</span>
+          </div>
+          <div class="space-y-2">
+            <div class="h-24 bg-[#fafafa] dark:bg-[#121212] rounded-[6px] border border-[#ebebeb] dark:border-[#222222] flex flex-col justify-end p-1">
+              <div class="bg-gradient-to-t from-[#0070f3] to-[#00dfd8] rounded-[4px] w-full h-[30%]"></div>
+            </div>
+            <span class="text-[11px] font-mono text-[#8f8f8f]">Wed</span>
+          </div>
+          <div class="space-y-2">
+            <div class="h-24 bg-[#fafafa] dark:bg-[#121212] rounded-[6px] border border-[#ebebeb] dark:border-[#222222] flex flex-col justify-end p-1">
+              <div class="bg-gradient-to-t from-[#0070f3] to-[#00dfd8] rounded-[4px] w-full h-[85%]"></div>
+            </div>
+            <span class="text-[11px] font-mono text-[#8f8f8f]">Thu</span>
+          </div>
+          <div class="space-y-2">
+            <div class="h-24 bg-[#fafafa] dark:bg-[#121212] rounded-[6px] border border-[#ebebeb] dark:border-[#222222] flex flex-col justify-end p-1">
+              <div class="bg-gradient-to-t from-[#0070f3] to-[#00dfd8] rounded-[4px] w-full h-[95%]"></div>
+            </div>
+            <span class="text-[11px] font-mono text-[#8f8f8f]">Fri</span>
+          </div>
+          <div class="space-y-2">
+            <div class="h-24 bg-[#fafafa] dark:bg-[#121212] rounded-[6px] border border-[#ebebeb] dark:border-[#222222] flex flex-col justify-end p-1">
+              <div class="bg-gradient-to-t from-[#0070f3] to-[#00dfd8] rounded-[4px] w-full h-[20%]"></div>
+            </div>
+            <span class="text-[11px] font-mono text-[#8f8f8f]">Sat</span>
+          </div>
+          <div class="space-y-2">
+            <div class="h-24 bg-[#fafafa] dark:bg-[#121212] rounded-[6px] border border-[#ebebeb] dark:border-[#222222] flex flex-col justify-end p-1">
+              <div class="bg-gradient-to-t from-[#0070f3] to-[#00dfd8] rounded-[4px] w-full h-[50%]"></div>
+            </div>
+            <span class="text-[11px] font-mono text-[#8f8f8f]">Sun</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Edit Task Modal Drawer -->
+  <div id="edit-task-modal" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="w-full max-w-lg rounded-[12px] bg-white dark:bg-[#0a0a0a] border border-[#ebebeb] dark:border-[#222222] shadow-2xl p-5 space-y-4 max-h-[90vh] overflow-y-auto">
+      <div class="flex items-center justify-between border-b border-[#ebebeb] dark:border-[#222222] pb-3">
+        <h3 class="font-semibold text-[15px] text-[#171717] dark:text-white">Edit Task Details</h3>
+        <button id="close-edit-modal" class="text-[#8f8f8f] hover:text-[#171717] dark:hover:text-white text-lg">✕</button>
+      </div>
+
+      <form id="edit-task-form" class="space-y-3">
+        <input type="hidden" id="edit-task-id" />
+        
+        <div>
+          <label class="block text-xs font-mono uppercase text-[#8f8f8f] mb-1">Title</label>
+          <input 
+            type="text" 
+            id="edit-task-title" 
+            required
+            class="w-full bg-[#fafafa] dark:bg-[#121212] border border-[#ebebeb] dark:border-[#222222] rounded-[6px] p-2 text-[14px] text-[#171717] dark:text-white focus:outline-none focus:border-[#0070f3]" 
+          />
+        </div>
+
+        <div>
+          <label class="block text-xs font-mono uppercase text-[#8f8f8f] mb-1">Notes & Description</label>
+          <textarea 
+            id="edit-task-desc" 
+            rows="3"
+            class="w-full bg-[#fafafa] dark:bg-[#121212] border border-[#ebebeb] dark:border-[#222222] rounded-[6px] p-2 text-xs text-[#171717] dark:text-white focus:outline-none focus:border-[#0070f3]"
+          ></textarea>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-mono uppercase text-[#8f8f8f] mb-1">Priority</label>
+            <select id="edit-task-priority" class="w-full bg-[#fafafa] dark:bg-[#121212] border border-[#ebebeb] dark:border-[#222222] text-xs rounded-[6px] p-2 text-[#171717] dark:text-white">
+              <option value="p1">P1 — Urgent & Important</option>
+              <option value="p2">P2 — High</option>
+              <option value="p3">P3 — Medium</option>
+              <option value="p4">P4 — Low</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="block text-xs font-mono uppercase text-[#8f8f8f] mb-1">Status</label>
+            <select id="edit-task-status" class="w-full bg-[#fafafa] dark:bg-[#121212] border border-[#ebebeb] dark:border-[#222222] text-xs rounded-[6px] p-2 text-[#171717] dark:text-white">
+              <option value="inbox">Backlog / Inbox</option>
+              <option value="todo">Ready / Todo</option>
+              <option value="in_progress">In Progress</option>
+              <option value="review">Review</option>
+              <option value="completed">Completed</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-mono uppercase text-[#8f8f8f] mb-1">Due Date</label>
+            <input type="date" id="edit-task-date" class="w-full bg-[#fafafa] dark:bg-[#121212] border border-[#ebebeb] dark:border-[#222222] text-xs rounded-[6px] p-2 text-[#171717] dark:text-white" />
+          </div>
+
+          <div>
+            <label class="block text-xs font-mono uppercase text-[#8f8f8f] mb-1">Est. Pomodoros</label>
+            <input type="number" min="1" max="20" id="edit-task-poms" class="w-full bg-[#fafafa] dark:bg-[#121212] border border-[#ebebeb] dark:border-[#222222] text-xs rounded-[6px] p-2 text-[#171717] dark:text-white" />
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-mono uppercase text-[#8f8f8f] mb-1">Tags</label>
+          <input type="text" id="edit-task-tags" class="w-full bg-[#fafafa] dark:bg-[#121212] border border-[#ebebeb] dark:border-[#222222] text-xs rounded-[6px] p-2 text-[#171717] dark:text-white" />
+        </div>
+
+        <!-- Subtasks Checklist in Edit Modal -->
+        <div class="pt-2">
+          <div class="flex items-center justify-between mb-1.5">
+            <label class="text-xs font-mono uppercase text-[#8f8f8f]">Checklist Subtasks</label>
+            <button type="button" id="modal-add-subtask-btn" class="text-[11px] text-[#0070f3] hover:underline">+ Add step</button>
+          </div>
+          <div id="modal-subtasks-list" class="space-y-1.5 max-h-36 overflow-y-auto"></div>
+        </div>
+
+        <div class="flex items-center justify-between pt-4 border-t border-[#ebebeb] dark:border-[#222222]">
+          <button type="button" id="modal-delete-btn" class="px-3 py-1.5 text-xs text-[#ee0000] hover:bg-[#ee0000]/10 rounded-[6px] transition-colors">
+            Delete Task
+          </button>
+          <div class="flex gap-2">
+            <button type="button" id="cancel-edit-modal" class="px-3 py-1.5 text-xs rounded-[6px] border border-[#ebebeb] dark:border-[#222222] text-[#4d4d4d] dark:text-[#a1a1a1]">
+              Cancel
+            </button>
+            <button type="submit" class="px-4 py-1.5 text-xs font-medium bg-[#171717] dark:bg-white text-white dark:text-[#171717] rounded-[6px]">
+              Save Changes
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- Command Palette Modal (Cmd+K) -->
+  <div id="cmd-palette-modal" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm hidden flex items-start justify-center pt-20 p-4">
+    <div class="w-full max-w-xl rounded-[12px] bg-white dark:bg-[#0a0a0a] border border-[#ebebeb] dark:border-[#222222] shadow-2xl overflow-hidden animate-in fade-in zoom-in-95 duration-100">
+      <div class="flex items-center px-4 border-b border-[#ebebeb] dark:border-[#222222]">
+        <svg class="w-4 h-4 text-[#8f8f8f] shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+        <input 
+          type="text" 
+          id="cmd-input" 
+          placeholder="Type a command or search tasks..."
+          autocomplete="off"
+          class="w-full bg-transparent border-none p-3.5 text-[14px] text-[#171717] dark:text-white placeholder-[#8f8f8f] focus:outline-none"
+        />
+        <kbd class="px-1.5 py-0.5 text-[10px] font-mono bg-[#f2f2f2] dark:bg-[#1a1a1a] text-[#8f8f8f] rounded">ESC</kbd>
+      </div>
+
+      <div id="cmd-results" class="max-h-72 overflow-y-auto p-2 space-y-1 text-xs">
+        <!-- Injected command items -->
+      </div>
+    </div>
+  </div>
+
+  <!-- Shortcuts Reference Modal -->
+  <div id="shortcuts-modal" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm hidden flex items-center justify-center p-4">
+    <div class="w-full max-w-md rounded-[12px] bg-white dark:bg-[#0a0a0a] border border-[#ebebeb] dark:border-[#222222] shadow-2xl p-5 space-y-4">
+      <div class="flex items-center justify-between border-b border-[#ebebeb] dark:border-[#222222] pb-2">
+        <h3 class="font-semibold text-[14px]">Keyboard Shortcuts</h3>
+        <button id="close-shortcuts-modal" class="text-[#8f8f8f] hover:text-[#171717] dark:hover:text-white">✕</button>
+      </div>
+      <div class="space-y-2 text-xs">
+        <div class="flex justify-between py-1 border-b border-[#ebebeb] dark:border-[#1f1f1f]">
+          <span class="text-[#4d4d4d] dark:text-[#a1a1a1]">Focus quick add bar</span>
+          <kbd class="font-mono bg-[#f2f2f2] dark:bg-[#1c1c1c] px-2 py-0.5 rounded">N</kbd>
+        </div>
+        <div class="flex justify-between py-1 border-b border-[#ebebeb] dark:border-[#1f1f1f]">
+          <span class="text-[#4d4d4d] dark:text-[#a1a1a1]">Open Command Palette</span>
+          <kbd class="font-mono bg-[#f2f2f2] dark:bg-[#1c1c1c] px-2 py-0.5 rounded">⌘ / Ctrl + K</kbd>
+        </div>
+        <div class="flex justify-between py-1 border-b border-[#ebebeb] dark:border-[#1f1f1f]">
+          <span class="text-[#4d4d4d] dark:text-[#a1a1a1]">Switch views (1-5)</span>
+          <kbd class="font-mono bg-[#f2f2f2] dark:bg-[#1c1c1c] px-2 py-0.5 rounded">1, 2, 3, 4, 5</kbd>
+        </div>
+        <div class="flex justify-between py-1 border-b border-[#ebebeb] dark:border-[#1f1f1f]">
+          <span class="text-[#4d4d4d] dark:text-[#a1a1a1]">Toggle Focus/Pomodoro</span>
+          <kbd class="font-mono bg-[#f2f2f2] dark:bg-[#1c1c1c] px-2 py-0.5 rounded">F</kbd>
+        </div>
+        <div class="flex justify-between py-1 border-b border-[#ebebeb] dark:border-[#1f1f1f]">
+          <span class="text-[#4d4d4d] dark:text-[#a1a1a1]">Close open modal</span>
+          <kbd class="font-mono bg-[#f2f2f2] dark:bg-[#1c1c1c] px-2 py-0.5 rounded">ESC</kbd>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+  <!-- Footer -->
+  <footer class="mt-auto border-t border-[#ebebeb] dark:border-[#222222] bg-[#fafafa] dark:bg-[#000000] py-6 text-xs text-[#8f8f8f] dark:text-[#707070]">
+    <div class="max-w-[1240px] mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-3">
+      <div class="flex items-center gap-2">
+        <span>Engineered with Geist Design System</span>
+        <span>•</span>
+        <span>Astro + Tailwind CSS v4</span>
+      </div>
+      <div class="flex items-center gap-4">
+        <span>Offline-first LocalDB</span>
+        <button id="footer-reset-btn" class="hover:text-[#171717] dark:hover:text-white transition-colors">Reset Database</button>
+      </div>
+    </div>
+  </footer>
+</div>
+
+<script>
+  import { TodoController } from '../scripts/app';
+
+  if (typeof window !== 'undefined') {
+    if (document.readyState === 'loading') {
+      window.addEventListener('DOMContentLoaded', () => {
+        new TodoController();
+      });
+    } else {
+      new TodoController();
+    }
+  }
+</script>

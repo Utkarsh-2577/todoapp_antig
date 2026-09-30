@@ -1,0 +1,110 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary: #171717;
+  --color-on-primary: #ffffff;
+  --color-ink: #171717;
+  --color-body: #4d4d4d;
+  --color-mute: #8f8f8f;
+  --color-faint: #a1a1a1;
+  --color-hairline: #ebebeb;
+  --color-hairline-soft: #f2f2f2;
+  --color-canvas: #fafafa;
+  --color-canvas-elevated: #ffffff;
+  --color-link: #0070f3;
+  --color-link-deep: #0761d1;
+  --color-link-soft: #d3e5ff;
+  --color-error: #ee0000;
+  --color-error-deep: #c50000;
+  --color-warning: #f5a623;
+  --color-warning-soft: #ffefcf;
+  --color-warning-deep: #ab570a;
+  --color-violet: #7928ca;
+  --color-violet-soft: #d8ccf1;
+  --color-cyan: #50e3c2;
+  --color-cyan-soft: #aaffec;
+  --color-pink: #ff0080;
+  --color-magenta: #eb367f;
+  --color-gradient-develop-start: #007cf0;
+  --color-gradient-develop-end: #00dfd8;
+  --color-gradient-preview-start: #7928ca;
+  --color-gradient-preview-end: #ff0080;
+  --color-gradient-ship-start: #ff4d4d;
+  --color-gradient-ship-end: #f9cb28;
+
+  --font-sans: "Geist", "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "Geist Mono", "JetBrains Mono", "SFMono-Regular", Menlo, Monaco, Consolas, monospace;
+
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-pill-category: 64px;
+  --radius-pill: 100px;
+}
+
+:root {
+  --app-bg: #fafafa;
+  --app-surface: #ffffff;
+  --app-surface-subtle: #f7f7f8;
+  --app-border: #ebebeb;
+  --app-border-hover: #d4d4d4;
+  --app-ink: #171717;
+  --app-body: #4d4d4d;
+  --app-mute: #8f8f8f;
+  --app-faint: #a1a1a1;
+  --app-accent: #0070f3;
+}
+
+html.dark {
+  --app-bg: #000000;
+  --app-surface: #0a0a0a;
+  --app-surface-subtle: #141414;
+  --app-border: #222222;
+  --app-border-hover: #383838;
+  --app-ink: #ededed;
+  --app-body: #a1a1a1;
+  --app-mute: #707070;
+  --app-faint: #454545;
+  --app-accent: #0070f3;
+}
+
+body {
+  background-color: var(--app-bg);
+  color: var(--app-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Custom scrollbar matching Geist design */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(140, 140, 140, 0.25);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(140, 140, 140, 0.45);
+}
+
+/* Mesh gradient hero background */
+.geist-hero-mesh {
+  background: 
+    radial-gradient(ellipse 60% 40% at 50% -10%, rgba(121, 40, 202, 0.12), transparent 70%),
+    radial-gradient(ellipse 40% 30% at 85% 15%, rgba(0, 223, 216, 0.12), transparent 60%),
+    radial-gradient(ellipse 45% 35% at 15% 20%, rgba(255, 0, 128, 0.08), transparent 60%),
+    radial-gradient(ellipse 50% 30% at 50% 40%, rgba(0, 112, 243, 0.08), transparent 70%);
+}
+
+html.dark .geist-hero-mesh {
+  background: 
+    radial-gradient(ellipse 60% 40% at 50% -10%, rgba(121, 40, 202, 0.22), transparent 70%),
+    radial-gradient(ellipse 40% 30% at 85% 15%, rgba(0, 223, 216, 0.18), transparent 60%),
+    radial-gradient(ellipse 45% 35% at 15% 20%, rgba(255, 0, 128, 0.15), transparent 60%),
+    radial-gradient(ellipse 50% 30% at 50% 40%, rgba(0, 112, 243, 0.18), transparent 70%);
+}
